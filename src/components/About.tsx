@@ -1,5 +1,5 @@
 import { useText } from "../hooks/useText";
-import React, { createContext, useContext, useEffect, useReducer } from "react";
+import React, { createContext, useContext, useReducer } from "react";
 import { IChildren } from "../types";
 import { IService, useServices } from "../hooks/useServices";
 
