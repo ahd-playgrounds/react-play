@@ -34,9 +34,10 @@ export function ignoreWarnings(
   ...ignorePatterns: RegExp[]
 ): void {
   beforeAll(() => {
+    const ogWarn = console.warn;
     jest.spyOn(console, "warn").mockImplementation((...args: string[]) => {
       if (!ignorePatterns.some((pat) => pat.test(args[0]))) {
-        console.info("WARN", ...args);
+        ogWarn(...args);
       }
     });
   });
@@ -80,15 +81,16 @@ export function ignoreErrors(
   reason: string,
   ...ignorePatterns: RegExp[]
 ): void {
-  beforeAll(() => {
+  beforeEach(() => {
+    const ogError = console.error;
     jest.spyOn(console, "error").mockImplementation((...args: string[]) => {
       if (!ignorePatterns.some((pat) => pat.test(args[0]))) {
-        console.info("ERROR", ...args);
+        ogError(...args);
       }
     });
   });
 
-  afterAll(() => {
-    (console.error as jest.Mock).mockRestore();
+  afterEach(() => {
+    // (console.error as jest.Mock).mockRestore();
   });
 }

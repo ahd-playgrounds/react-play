@@ -1,6 +1,6 @@
 import { byRole, byText } from "testing-library-selector";
-import { copy } from "../copy";
-import { renderPage } from "../testHelpers/rtl";
+import { copy } from "../../copy";
+import { renderPage } from "../../testHelpers/rtl";
 import { About } from "./About";
 import React from "react";
 import userEvent from "@testing-library/user-event";
@@ -21,6 +21,11 @@ const pageModel = {
     header: byText(copy.error.heading),
     body: byText(copy.error.body),
     button: byRole(copy.error.tryAgainButton),
+  },
+  about: {
+    characterCard: {
+      name: byText("Morty"),
+    },
   },
 };
 
@@ -66,6 +71,23 @@ describe("About Page", () => {
 
     describe("when a character loads on another try", () => {
       it.todo("should allow the user to try again, with success");
+    });
+  });
+
+  describe("when a character loads", () => {
+    it("should show the character", async () => {
+      renderPage(<About />);
+
+      const {
+        about: {
+          characterCard: { name },
+        },
+        welcome: { loadCharacterButton },
+      } = pageModel;
+
+      userEvent.click(loadCharacterButton.get());
+
+      expect(await name.find()).toBeInTheDocument();
     });
   });
 });

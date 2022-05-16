@@ -1,8 +1,9 @@
 import { createContext, useContext } from "react";
 import { IChildren } from "../types";
+import { ICharacter } from "../services/rickAndMortyService";
 
 export interface IService {
-  getCharacter(id?: string): Promise<string>;
+  getCharacter(id?: string): Promise<ICharacter>;
 }
 
 export interface IServicesProvider extends IChildren {

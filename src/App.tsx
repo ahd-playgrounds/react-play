@@ -1,7 +1,7 @@
 import React from "react";
 import "./App.css";
 import { Providers } from "./components/Providers";
-import { About } from "./components/About";
+import { About, About2 } from "./components/About/About";
 
 function App() {
   return (
@@ -10,12 +10,15 @@ function App() {
         services={{
           service: {
             getCharacter(id?: string) {
-              return Promise.resolve("hello");
+              return fetch("https://rickandmortyapi.com/api/character/2").then(
+                (d) => d.json()
+              );
             },
           },
         }}
       >
         <About />
+        {/*<About2 />*/}
       </Providers>
     </div>
   );

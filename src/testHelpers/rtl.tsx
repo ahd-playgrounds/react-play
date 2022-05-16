@@ -2,6 +2,8 @@ import React from "react";
 import merge from "lodash.merge";
 import { render, RenderOptions } from "@testing-library/react";
 import { IProviders, Providers } from "../components/Providers";
+import { IChildren } from "../types";
+import { fakeRickAndMortyService } from "../services/rickAndMortyService";
 
 type ProviderArgs = Omit<IProviders, "children">;
 interface Options {
@@ -16,19 +18,9 @@ export type DeepPartial<T> = {
 export function renderPage(ui: React.ReactElement, options?: Options) {
   const { renderOptions, providerOverrides } = options ?? {};
 
-  const fakes: ProviderArgs = {
-    services: {
-      service: {
-        async getCharacter(id?: string) {
-          return Promise.resolve("hi");
-        },
-      },
-    },
-  };
-
   const view = render(ui, {
     wrapper: ({ children }) => (
-      <Providers {...merge({}, fakes, providerOverrides)}>{children}</Providers>
+      <FakeProviders {...providerOverrides}>{children}</FakeProviders>
     ),
     ...renderOptions,
   });
@@ -36,4 +28,16 @@ export function renderPage(ui: React.ReactElement, options?: Options) {
   return {
     view,
   };
+}
+
+export function FakeProviders(props: DeepPartial<ProviderArgs> & IChildren) {
+  const { children, services } = props;
+
+  const fakes: ProviderArgs = {
+    services: {
+      service: fakeRickAndMortyService,
+    },
+  };
+
+  return <Providers {...merge({}, fakes, { services })}>{children}</Providers>;
 }
