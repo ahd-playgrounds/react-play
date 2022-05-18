@@ -1,6 +1,7 @@
 /* eslint-disable jest/no-conditional-expect */
 import {
   Action,
+  asyncDispatcher,
   Dispatcher,
   dispatchMiddleware,
   initialState,
@@ -141,7 +142,10 @@ describe("useAboutPage reducer", () => {
   });
 });
 
-describe("useAboutPage middleware", () => {
+/**
+ * IGNORE THIS ONE
+ */
+describe.skip("useAboutPage middleware", () => {
   test("on a failed request, should transition from loading to error", (done) => {
     const spy = jest.fn();
 
@@ -265,5 +269,19 @@ describe("useAboutPage middleware", () => {
         });
       };
     }
+  });
+});
+
+describe("useAboutPage async middleware", () => {
+  test("on a failed request, should transition from loading to error", async () => {
+    const spy = jest.fn();
+
+    await asyncDispatcher({
+      getCharacter: async () => Promise.reject("hi"),
+    })(spy)({ event: "LOAD" });
+
+    expect(spy).toHaveBeenCalledWith<[Action]>({ event: "_LOADING" });
+    expect(spy).toHaveBeenCalledWith<[Action]>({ event: "_ERROR" });
+    expect(spy).toHaveBeenCalledTimes(2);
   });
 });

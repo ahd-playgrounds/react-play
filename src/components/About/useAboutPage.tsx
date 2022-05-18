@@ -1,4 +1,4 @@
-import React, { useReducer } from "react";
+import React, { Reducer, useCallback, useReducer } from "react";
 import { IService, useServices } from "../../hooks/useServices";
 import { ICharacter } from "../../services/rickAndMortyService";
 
@@ -67,8 +67,59 @@ export function dispatchMiddleware(
 
 type AboutContext = [state: State, dispatch: Dispatcher<UserAction>];
 
-export const useAboutPage = (initial = initialState): AboutContext => {
+export const useAboutPage2 = (initial = initialState): AboutContext => {
   const services = useServices();
   const [state, dispatch] = useReducer(reducer, initialState);
-  return [state, dispatchMiddleware(dispatch, services.service)];
+
+  // services should never change, but adding just in case
+  const wrappedDispatch = useCallback(
+    dispatchMiddleware(dispatch, services.service),
+    [services.service]
+  );
+
+  return [state, wrappedDispatch];
 };
+
+/// async
+function useAsyncReducer<S, A, Au, R extends React.Reducer<S, Au>>(
+  reducer: R,
+  initial: S,
+  middleware: (dispatch: React.Dispatch<Au>) => (a: A) => void
+): [S, (a: A) => void] {
+  const [state, dispatch] = useReducer(
+    reducer as React.Reducer<S, Au>,
+    initial
+  );
+  const d = useCallback(middleware(dispatch), []);
+  return [state, d];
+}
+
+export const useAboutPage = (initial = initialState) => {
+  const services = useServices();
+  return useAsyncReducer(reducer, initial, asyncDispatcher(services.service));
+};
+
+type AsyncDispatcher<A, B> = (
+  dispatch: React.Dispatch<B>
+) => (action: A) => Promise<void>;
+
+export function asyncDispatcher(
+  service: IService
+): AsyncDispatcher<UserAction, Action> {
+  return (dispatch) => async (action) => {
+    switch (action.event) {
+      case "LOAD":
+        dispatch({ event: "_LOADING" });
+        try {
+          const data = await service.getCharacter();
+          dispatch({ event: "_SUCCESS", data });
+        } catch (e) {
+          dispatch({ event: "_ERROR" });
+        }
+        break;
+      default:
+        dispatch(action);
+        break;
+    }
+  };
+}
